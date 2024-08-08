@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teleprompter App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #1a202c;
+            color: white;
+            padding: 1rem;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 1rem;
+        }
+        #cueList {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+        }
+        #cueList li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        input, button {
+            padding: 0.5rem;
+            margin: 0.25rem;
+            font-size: 1rem;
+        }
+        input {
+            color: black;
+            width: calc(50% - 0.5rem);
+        }
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 0.25rem;
+            color: white;
+        }
+        .remove {
+            background-color: #e53e3e;
+        }
+        .add {
+            background-color: #4299e1;
+            width: calc(50% - 0.5rem);
+        }
+        .start, .pause {
+            background-color: #48bb78;
+        }
+        .reset {
+            background-color: #ed8936;
+        }
+        #currentCue {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        #timeLeft {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .control-buttons button {
+            width: 45%;
+            max-width: 200px;
+        }
+        @media (min-width: 768px) {
+            body {
+                font-size: 18px;
+            }
+            #currentCue {
+                font-size: 3.5rem;
+            }
+            #timeLeft {
+                font-size: 6rem;
+            }
+            .container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                height: 100vh;
+            }
+        }
+        @media (min-width: 1024px) {
+            body {
+                font-size: 20px;
+            }
+            #currentCue {
+                font-size: 4rem;
+            }
+            #timeLeft {
+                font-size: 7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="editMode">
+            <ul id="cueList"></ul>
+            <div>
+                <input type="text" id="newCueText" placeholder="Neuer Stichpunkt">
+                <input type="number" id="newCueDuration" placeholder="Dauer">
+                <button class="add" onclick="addCue()">Hinzufügen</button>
+            </div>
+        </div>
+        <div id="prompterMode" style="display: none;">
+            <div id="currentCue"></div>
+            <div id="timeLeft"></div>
+        </div>
+        <div class="control-buttons">
+            <button id="toggleButton" class="start" onclick="toggleTimer()">Start</button>
+            <button class="reset" onclick="resetTimer()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        let cues = [];
+        let currentCueIndex = 0;
+        let timeLeft = 0;
+        let isRunning = false;
+        let timer;
+        const warningThreshold = 30;
+        const dangerThreshold = 15;
+
+        function addCue() {
+            const text = document.getElementById('newCueText').value;
+            const duration = parseInt(document.getElementById('newCueDuration').value);
+            if (text && duration) {
+                cues.push({ text, duration });
+                updateCueList();
+                document.getElementById('newCueText').value = '';
+                document.getElementById('newCueDuration').value = '';
+            }
+        }
+
+        function removeCue(index) {
+            cues.splice(index, 1);
+            updateCueList();
+        }
+
+        function updateCueList() {
+            const list = document.getElementById('cueList');
+            list.innerHTML = '';
+            cues.forEach((cue, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${cue.text} - ${cue.duration}s</span>
+                    <button class="remove" onclick="removeCue(${index})">Entfernen</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function toggleTimer() {
+            if (!isRunning && cues.length > 0) {
+                currentCueIndex = 0;
+                timeLeft = cues[0].duration;
+                document.getElementById('editMode').style.display = 'none';
+                document.getElementById('prompterMode').style.display = 'block';
+                updateDisplay();
+            }
+            isRunning = !isRunning;
+            document.getElementById('toggleButton').textContent = isRunning ? 'Pause' : 'Start';
+            document.getElementById('toggleButton').className = isRunning ? 'pause' : 'start';
+            if (isRunning) {
+                timer = setInterval(updateTimer, 1000);
+            } else {
+                clearInterval(timer);
+            }
+        }
+
+        function resetTimer() {
+            isRunning = false;
+            clearInterval(timer);
+            currentCueIndex = 0;
+            timeLeft = cues[0]?.duration || 0;
+            document.getElementById('editMode').style.display = 'block';
+            document.getElementById('prompterMode').style.display = 'none';
+            document.getElementById('toggleButton').textContent = 'Start';
+            document.getElementById('toggleButton').className = 'start';
+        }
+
+        function updateTimer() {
+            if (timeLeft > 0) {
+                timeLeft--;
+                updateDisplay();
+            } else if (currentCueIndex < cues.length - 1) {
+                currentCueIndex++;
+                timeLeft = cues[currentCueIndex].duration;
+                updateDisplay();
+            } else {
+                resetTimer();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('currentCue').textContent = cues[currentCueIndex].text;
+            document.getElementById('timeLeft').textContent = timeLeft;
+            if (timeLeft <= dangerThreshold) {
+                document.getElementById('timeLeft').style.color = 'red';
+            } else if (timeLeft <= warningThreshold) {
+                document.getElementById('timeLeft').style.color = 'yellow';
+            } else {
+                document.getElementById('timeLeft').style.color = 'white';
+            }
+        }
+    </script>
+</body>
+</html>

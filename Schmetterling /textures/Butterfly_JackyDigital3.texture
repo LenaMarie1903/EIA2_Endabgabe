@@ -1,0 +1,41 @@
+{
+  "modelName": "texture",
+  "name": "Butterfly_JackyDigital3",
+  "identifier": "texture:92565-14cbdbdc-f65d-4a77-9cae-09bf7d5c74fa",
+  "alphaPremultiplicationMode": "should_premultiply",
+  "assetDataHash": "084774ae4239113b9b5f77ccfed71d2d",
+  "assetLocator": "textures/Butterfly_JackyDigital3.png",
+  "colorEncoding": "linear",
+  "compressionQuality": "high",
+  "coordMapping": "none",
+  "excludeDuringExport": false,
+  "excludeFromPackage": false,
+  "exportConfigurations": [
+    "textureExportConfig:96805-93758260-0c85-47cf-b395-713791845e0d",
+    "textureExportConfig:96831-93758260-0c85-47cf-b395-713791845e0d",
+    "textureExportConfig:96857-93758260-0c85-47cf-b395-713791845e0d"
+  ],
+  "filter": "bilinear",
+  "hasOfflineMipmaps": false,
+  "height": 400,
+  "importIssues": {},
+  "isExternalAsset": true,
+  "smartTextureTargetSizeLimit": "largest",
+  "targetSize": "largest",
+  "uWrapMode": "clamp",
+  "vWrapMode": "clamp",
+  "width": 400,
+  "children": [
+    {
+      "modelName": "data_texture_metadata_model",
+      "name": "data_texture_metadata_model0",
+      "assetDataHash": "084774ae4239113b9b5f77ccfed71d2d",
+      "colorCount": 5990,
+      "detectedAlphaChannel": "eight_bit_full_range",
+      "detectedOriginalFormat": "png",
+      "entropyOfDistribution": 1.6666750464290008,
+      "pixelsHigh": 400,
+      "pixelsWide": 400
+    }
+  ]
+}
